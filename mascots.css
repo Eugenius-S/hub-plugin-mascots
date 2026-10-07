@@ -2,10 +2,12 @@
 .pet { position: relative; overflow: hidden; flex: none; line-height: 0; }
 .pet img { display: block; width: 600%; height: 100%; max-width: none; transform: translateX(0); user-select: none; -webkit-user-drag: none; }
 .pet-head { width: 37px; height: 40px; margin: -4px 0; cursor: pointer; }
-/* вместо аватара: значок аккаунта прячется, маскот — на кнопке «Настройки», огонёк связи поверх */
-.pet-avatar { width: 33px; height: 36px; pointer-events: none; }
-body.pet-as-avatar #conn > .icon { display: none; }
-body.pet-as-avatar #conn .dot { z-index: 1; }
+/* вместо аватара (владелец 07.10: «убрать точку и круг, размером как в режиме маскота»): на кнопке «Настройки» — только
+   маскот того же размера, что справа от названия; без круга-подложки, значка аккаунта и огонька связи */
+.pet-avatar { width: 37px; height: 40px; margin: -2px 0; pointer-events: none; }
+body.pet-as-avatar #conn { width: auto; height: auto; background: transparent; border-radius: 0; }
+body.pet-as-avatar #conn:hover, body.pet-as-avatar #conn[aria-current="true"] { background: transparent; }
+body.pet-as-avatar #conn > .icon, body.pet-as-avatar #conn > .dot { display: none; }
 .pets-opt { display: inline-flex; align-items: center; gap: 6px; margin-left: auto; font-size: var(--text-sm); color: var(--foreground); cursor: pointer; }
 .pets-opt + button { margin-left: 0; }
 /* свой маскот вместо облачка плагина mascot — не два сразу */
