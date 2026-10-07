@@ -1,0 +1,45 @@
+/* «Маскоты»: маскот в шапке боковой панели и галерея в настройках. Токены страницы, своих цветов нет. */
+.pet { position: relative; overflow: hidden; flex: none; line-height: 0; }
+.pet img { display: block; width: 600%; height: 100%; max-width: none; transform: translateX(0); user-select: none; -webkit-user-drag: none; }
+.pet-head { width: 37px; height: 40px; margin: -4px 0; cursor: pointer; }
+/* вместо аватара: значок аккаунта прячется, маскот — на кнопке «Настройки», огонёк связи поверх */
+.pet-avatar { width: 33px; height: 36px; pointer-events: none; }
+body.pet-as-avatar #conn > .icon { display: none; }
+body.pet-as-avatar #conn .dot { z-index: 1; }
+.pets-opt { display: inline-flex; align-items: center; gap: 6px; margin-left: auto; font-size: var(--text-sm); color: var(--foreground); cursor: pointer; }
+.pets-opt + button { margin-left: 0; }
+/* свой маскот вместо облачка плагина mascot — не два сразу */
+body.has-pet .mascot.in-header { display: none; }
+
+.pets { display: grid; gap: var(--space-3); max-width: 960px; }
+.pets-now { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); background: var(--card); }
+.pets-now .pet { width: 74px; height: 80px; }
+.pets-now b { display: block; font-weight: 600; }
+.pets-now span { color: var(--muted-foreground); font-size: var(--text-xs); }
+.pets-now button { margin-left: auto; }
+.pets-bar { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
+.pets-q { min-width: 240px; flex: 1; padding: 6px 10px; border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--card); color: var(--foreground); font: inherit; }
+.pets-count, .pets-note { color: var(--muted-foreground); font-size: var(--text-xs); margin: 0; }
+.pets-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: var(--space-2); }
+.pets-card { display: grid; justify-items: center; gap: 4px; padding: var(--space-2); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); background: var(--card); color: var(--foreground); font: inherit; cursor: pointer; text-align: center; }
+.pets-card:hover { border-color: var(--input); background: var(--muted); }
+.pets-card[aria-pressed="true"] { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary) inset; }
+.pets-card .pet { width: 96px; height: 104px; }
+.pets-name { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--text-sm); }
+.pets-more { justify-self: center; }
+
+/* фильтры — как на petdex.dev: строка = подпись + чипы со счётчиками */
+.pets-filters { display: grid; gap: var(--space-2); padding: var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--card); }
+.pets-frow { display: grid; grid-template-columns: 72px 1fr; align-items: start; gap: var(--space-2); }
+.pets-flabel { padding-top: 5px; font-family: var(--font-code, monospace); font-size: var(--text-xs); letter-spacing: .12em; text-transform: uppercase; color: var(--muted-foreground); }
+.pets-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.pets-chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border: 1px solid var(--border); border-radius: 9999px; background: var(--card); color: var(--foreground); font: inherit; font-size: var(--text-sm); cursor: pointer; }
+.pets-chip small { color: var(--muted-foreground); font-family: var(--font-code, monospace); font-size: var(--text-xs); }
+.pets-chip:hover { border-color: var(--input); background: var(--muted); }
+.pets-chip[aria-pressed="true"] { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 10%, var(--card)); }
+.pets-chip.more { border-color: transparent; background: transparent; color: var(--muted-foreground); }
+.pets-dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+.pets-reset { justify-self: start; }
