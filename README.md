@@ -10,3 +10,5 @@
 Нужен хаб с API плагинов 1.5 или новее. Поставить: «Настройки» → «Плагины» → «Можно поставить» → mascots.
 
 Тесты: `python3 -m unittest discover -s tests`. Код — MIT; маскоты — их авторов на petdex.dev.
+
+Иконка — [3D Fluency](https://icons8.com/icons/3d-fluency) от Icons8.
