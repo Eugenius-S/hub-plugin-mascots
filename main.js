@@ -7,7 +7,9 @@
 const CDN = "https://assets.petdex.dev/pets";
 const KEY = "hub.mascots.pet";
 const AVATAR = "hub.mascots.avatar";   // "1" — маскот вместо значка аккаунта в шапке (владелец 07.10)
-const asAvatar = () => { try { return localStorage.getItem(AVATAR) === "1"; } catch { return false; } };
+// кнопка «Настройки» (#conn) стояла в шапке; в хабе с меню ☰ (v1.1) она — пункт меню (#nav-extra), аватару там не место
+const accountInHeader = () => { const c = document.getElementById("conn"); return !!c && !c.closest("#nav-extra"); };
+const asAvatar = () => { try { return localStorage.getItem(AVATAR) === "1" && accountInHeader(); } catch { return false; } };
 const FRAMES = 6, STEP_MS = 180, PAGE = 60;
 const calm = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 const preview = (id) => `${CDN}/${encodeURIComponent(id)}/preview.webp`;
@@ -110,7 +112,7 @@ function paintNow() {
     paintHead(); paintNow();
   });
   opt.append(cb, hub.el("span", null, "Вместо аватара в шапке"));
-  box.append(s.node, text, opt, off);
+  box.append(s.node, text, ...(accountInHeader() ? [opt] : []), off);   // нет кнопки в шапке — выбора «вместо аватара» нет
   now.replaceChildren(box);
 }
 
