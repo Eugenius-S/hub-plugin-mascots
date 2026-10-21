@@ -64,7 +64,7 @@ class Manifest(unittest.TestCase):
         with open(os.path.join(PLUGIN, "main.js"), encoding="utf-8") as f:
             js = f.read()
         rows = re.findall(r'\{ key: "(\w+)", label: "([^"]+)"', js)
-        self.assertEqual(rows, [("kind", "Тип"), ("color", "Цвет")])   # версия и набор — убраны (владелец 07.10)
+        self.assertEqual(rows, [("kind", "Тип"), ("color", "Цвет")])   # версия и набор — убраны
         self.assertRegex(js, r'key: "color"[^\n]*all: true')   # цвета сразу все, без «+N ещё»
 
     def test_header_mascot_opens_the_gallery(self):

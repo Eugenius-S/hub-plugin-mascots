@@ -1,4 +1,4 @@
-// «Маскоты» (владелец 07.10: «галерея маскотов для шапки, без поверх всех»): каталог — маскоты petdex.dev, выбранный
+// «Маскоты»: каталог — маскоты petdex.dev, выбранный
 // живёт в шапке боковой панели (sidebar.header, API 1.5), галерея — «Настройки» → «Маскоты». Без окна поверх всех и
 // без хоткеев. Картинка — превью petdex: полоса 1152×208, шесть кадров покоя 192×208 (assets.petdex.dev/pets/<id>/
 // preview.webp); кадры листает свой таймер, а не CSS — страница вставляет элемент места заново на каждом снимке, и
@@ -10,7 +10,7 @@
 const CDN = "https://assets.petdex.dev/pets";
 const CLOUD = "kalimullin:mascot";
 const KEY = "hub.mascots.pet";
-const AVATAR = "hub.mascots.avatar";   // "1" — маскот вместо значка аккаунта в шапке (владелец 07.10)
+const AVATAR = "hub.mascots.avatar";   // "1" — маскот вместо значка аккаунта в шапке
 // кнопка «Настройки» (#conn) стояла в шапке; в хабе с меню ☰ (v1.1) она — пункт меню (#nav-extra), аватару там не место
 const accountInHeader = () => { const c = document.getElementById("conn"); return !!c && !c.closest("#nav-extra"); };
 const asAvatar = () => { try { return localStorage.getItem(AVATAR) === "1" && accountInHeader(); } catch { return false; } };
@@ -36,7 +36,7 @@ const KIND = { character: "Персонаж", creature: "Существо", obje
 const COLOR = { orange: ["Оранжевый", "#f97316"], red: ["Красный", "#ef4444"], blue: ["Синий", "#3b82f6"], brown: ["Коричневый", "#92400e"],
   yellow: ["Жёлтый", "#eab308"], pink: ["Розовый", "#ec4899"], purple: ["Фиолетовый", "#a855f7"], teal: ["Бирюзовый", "#14b8a6"],
   green: ["Зелёный", "#22c55e"], gray: ["Серый", "#9ca3af"], white: ["Белый", "#e5e7eb"], black: ["Чёрный", "#111827"] };
-// строки фильтров: тип и цвет (владелец 07.10: версию и набор убрать, цвет — все сразу, без «+N ещё»); версия и месяц
+// строки фильтров: тип и цвет; версия и месяц
 // набора остаются в каталоге — вернуть строку = добавить её сюда
 const ROWS = [
   { key: "kind", label: "Тип", at: 2, name: (v) => KIND[v] || v, dot: () => "#6b7280" },
