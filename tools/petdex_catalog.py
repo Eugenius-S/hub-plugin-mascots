@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
-"""Каталог маскотов petdex.dev для плагина «Маскоты» (catalog.json в корне репо).
+"""The petdex.dev mascot catalog for the "Mascots" plugin (catalog.json in the repo root).
 
-Откуда что (только открытое; /api/ сайта закрыт в robots.txt, страницы с параметрами — за проверкой Cloudflare, их не
-трогаем):
-- имя, тип (character/creature/object), версия спрайта — публичный манифест `assets.petdex.dev/manifests/petdex-v1.json`
-  (его же читает `npx petdex`);
-- «набор» (Class of <месяц>) — месяц `lastmod` маскота в sitemap.xml (у petdex он равен дате одобрения);
-- цвет — считаем сами: первый кадр превью (assets.petdex.dev/pets/<id>/preview.webp) разбирает Chrome в canvas, берём
-  преобладающее семейство цвета. Это не цвет петдекса (его в открытом виде нет): счётчики немного отличаются;
-- настроения (Wholesome, Playful…) петдекс отдаёт только страницами по 60 штук и через API — не берём.
-Порядок: популярные с главной, дальше по алфавиту. Цвета уже посчитанных маскотов берутся из прежнего catalog.json —
-повторный запуск считает только новых. Запуск: python3 tools/petdex_catalog.py [--no-colors | --recolor]; нужен Google Chrome
-(цвет) — нет его, остальное обновится, цвет останется прежним."""
+Where each field comes from (open data only; the site's /api/ is closed in robots.txt, pages with parameters sit behind a
+Cloudflare check, we do not touch them):
+- name, kind (character/creature/object), sprite version: the public manifest `assets.petdex.dev/manifests/petdex-v1.json`
+  (the same one `npx petdex` reads);
+- "era" (Class of <month>): the month of the mascot's `lastmod` in sitemap.xml (for petdex it equals the approval date);
+- color: computed here: Chrome decodes the first frame of the preview (assets.petdex.dev/pets/<id>/preview.webp) into a
+  canvas and we take the dominant color family. It is not petdex's own color (that is not available openly): the
+  counters differ slightly;
+- moods (Wholesome, Playful...) petdex serves only as pages of 60 and through its API: not taken.
+Order: the popular ones from the home page, then alphabetical. Colors of the mascots already computed are taken from the
+previous catalog.json: a re-run computes only the new ones. Run: python3 tools/petdex_catalog.py [--no-colors | --recolor];
+needs Google Chrome (for color): without it everything else updates and the color stays as it was."""
 import json
 import os
 import re
@@ -28,11 +29,11 @@ MANIFEST = "https://assets.petdex.dev/manifests/petdex-v1.json"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "catalog.json")
 ID = re.compile(r"^[a-z0-9][a-z0-9-]*$")
-UUID = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")   # чужие загрузки без превью
-BATCH = 250   # картинок на один запуск Chrome
+UUID = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")   # foreign uploads without a preview
+BATCH = 250   # images per Chrome run
 
-# цвет считает Chrome: кадр 0 превью (192×208) → 48×52, пиксели по семействам; чёрный/белый/серый (контуры, фон)
-# учитываются, только если ничего цветного нет
+# Chrome computes the color: frame 0 of the preview (192×208) -> 48×52, pixels by family; black/white/gray (outlines,
+# background) count only when there is nothing colored
 COLOR_JS = r"""
 const FAM = (r, g, b) => {
   const mx = Math.max(r, g, b) / 255, mn = Math.min(r, g, b) / 255, l = (mx + mn) / 2, d = mx - mn;
@@ -79,7 +80,7 @@ def get(url):
     try:
         with urllib.request.urlopen(req, timeout=60) as r:
             return r.read().decode("utf-8")
-    except urllib.error.URLError:   # urllib не ходит через https-прокси (у некоторых машин он в окружении) — curl умеет
+    except urllib.error.URLError:   # urllib does not go through an https proxy (some machines have one in the environment); curl does
         r = subprocess.run(["curl", "-sfL", "-m", "90", url], capture_output=True, timeout=120)
         if r.returncode:
             raise
@@ -91,7 +92,7 @@ def title(pet_id):
 
 
 def eras_from_sitemap(xml):
-    """{id: "2026-05"} — месяц lastmod страницы маскота (у petdex это дата одобрения)."""
+    """{id: "2026-05"}: the month of the mascot page lastmod (for petdex, the approval date)."""
     out = {}
     for m in re.finditer(r"<url>\s*<loc>https://petdex\.dev/pets/([^</]+)</loc>(.*?)</url>", xml, flags=re.S):
         d = re.search(r"<lastmod>(\d{4}-\d{2})", m.group(2))
@@ -101,7 +102,7 @@ def eras_from_sitemap(xml):
 
 
 def popular(home):
-    """Маскоты с главной в порядке показа: id и имя из подписи «Open <имя>» (имена бывают не латиницей)."""
+    """Mascots from the home page in display order: id and name from the "Open <name>" label (names may be non-Latin)."""
     out = {}
     for m in re.finditer(r'aria-label="Open ([^"]+)"[^>]*?href="/pets/([^"]+)"', home):
         out.setdefault(m.group(2), m.group(1))
@@ -109,7 +110,7 @@ def popular(home):
 
 
 def build(manifest, sitemap, home, colors=None):
-    """[id, имя, тип, версия, цвет, набор] для каждого маскота манифеста; популярные первыми, дальше по алфавиту."""
+    """[id, name, kind, version, color, era] for every mascot of the manifest; the popular first, then alphabetical."""
     colors, eras, top = colors or {}, eras_from_sitemap(sitemap), popular(home)
     rows = {}
     for p in manifest.get("pets", []):
@@ -139,7 +140,7 @@ def find_chrome():
 
 
 def colors_for(ids, chrome):
-    """{id: семейство цвета} — Chrome считает по превью пачками; не вышло с пачкой — её маскоты без цвета."""
+    """{id: color family}: Chrome computes from the previews in batches; if a batch fails its mascots stay without color."""
     out = {}
     for n in range(0, len(ids), BATCH):
         chunk = ids[n:n + BATCH]
@@ -157,8 +158,8 @@ def colors_for(ids, chrome):
                     if c:
                         out[i] = c
             except (subprocess.TimeoutExpired, ValueError, OSError) as e:
-                print(f"пачка {n}: {e}", file=sys.stderr)
-        print(f"цвет: {min(n + BATCH, len(ids))}/{len(ids)}", flush=True)
+                print(f"batch {n}: {e}", file=sys.stderr)
+        print(f"color: {min(n + BATCH, len(ids))}/{len(ids)}", flush=True)
     return out
 
 
@@ -176,12 +177,12 @@ def main():
         for p in cat["pets"]:
             p[4] = p[4] or got.get(p[0], "")
     elif todo:
-        print(f"без цвета: {len(todo)} (нет Chrome или --no-colors)")
+        print(f"without color: {len(todo)} (no Chrome or --no-colors)")
     if len(cat["pets"]) < 100:
-        sys.exit(f"подозрительно мало маскотов: {len(cat['pets'])} — сайт изменился?")
+        sys.exit(f"suspiciously few mascots: {len(cat['pets'])}: did the site change?")
     with open(OUT, "w", encoding="utf-8", newline="\n") as f:
         json.dump(cat, f, ensure_ascii=False, separators=(",", ":"))
-    print(f"{len(cat['pets'])} маскотов, популярных {cat['top']}, с цветом {sum(1 for p in cat['pets'] if p[4])} → {OUT}")
+    print(f"{len(cat['pets'])} mascots, {cat['top']} popular, {sum(1 for p in cat['pets'] if p[4])} with color -> {OUT}")
 
 
 if __name__ == "__main__":

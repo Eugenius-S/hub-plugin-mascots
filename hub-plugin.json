@@ -1,9 +1,15 @@
 {
   "name": "mascots",
   "icon": "icon.png",
-  "description": "Маскот в шапке списка сессий, рядом с поиском (в хабе без меню ☰ — ещё и вместо аватара), на выбор почти 5000 персонажей в «Настройки» → «Маскоты». Картинки грузятся с сайта petdex.dev, выбор хранится в браузере",
-  "why": "Шапка хаба оживает",
-  "version": "1.2.0",
+  "description": "A mascot in the header of the session list, next to the search (in a hub without the ☰ menu it can also replace the avatar), with almost 5000 characters to choose from in Settings → Mascots. The pictures are loaded from petdex.dev, the choice is kept in the browser",
+  "why": "The hub header comes alive",
+  "version": "1.3.0",
   "hub": "^1.5",
-  "web": "main.js"
+  "web": "main.js",
+  "i18n": {
+    "ru": {
+      "description": "Маскот в шапке списка сессий, рядом с поиском (в хабе без меню ☰ — ещё и вместо аватара), на выбор почти 5000 персонажей в «Настройки» → «Маскоты». Картинки грузятся с сайта petdex.dev, выбор хранится в браузере",
+      "why": "Шапка хаба оживает"
+    }
+  }
 }
