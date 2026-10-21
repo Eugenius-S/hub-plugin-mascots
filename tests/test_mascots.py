@@ -72,6 +72,17 @@ class Manifest(unittest.TestCase):
             js = f.read()
         self.assertIn('"hub.settingsTab", "x:mascots"', js)   # вкладка плагина в «Настройках»: x:<id>
 
+    def test_cloud_plugin_is_one_choice_and_never_drawn_with_a_pet(self):
+        # the kalimullin:mascot cloud is a gallery card; we never copy its code, our choice hides it and turns it on
+        with open(os.path.join(PLUGIN, "main.js"), encoding="utf-8") as f:
+            js = f.read()
+        with open(os.path.join(PLUGIN, "mascots.css"), encoding="utf-8") as f:
+            css = f.read()
+        self.assertIn('const CLOUD = "kalimullin:mascot"', js)
+        self.assertIn('"/api/plugins/toggle", { name: CLOUD, enabled: true }', js)
+        self.assertIn("body.has-pet .mascot.in-header { display: none; }", css)   # a mascot is picked: no cloud in the header
+        self.assertIn('toggle("has-pet", !!pet)', js)   # no mascot: no class, the cloud is visible
+
     def test_images_are_requested_without_referer(self):
         # CDN petdex отвечает 403 на запрос с чужого Referer — без этой строки в хабе все превью «битые» (07.10)
         with open(os.path.join(PLUGIN, "main.js"), encoding="utf-8") as f:

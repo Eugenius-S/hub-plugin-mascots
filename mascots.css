@@ -30,6 +30,8 @@ body.has-pet .mascot.in-header { display: none; }
 .pets-card:hover { border-color: var(--input); background: var(--muted); }
 .pets-card[aria-pressed="true"] { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary) inset; }
 .pets-card .pet { width: 96px; height: 104px; }
+.pets-cloud { display: grid; place-items: center; width: 96px; height: 104px; font-size: 56px; line-height: 1; color: var(--muted-foreground); }
+.pets-cloud img { width: 72px; height: 72px; }
 .pets-name { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--text-sm); }
 .pets-more { justify-self: center; }
 

@@ -4,7 +4,11 @@
 // preview.webp); кадры листает свой таймер, а не CSS — страница вставляет элемент места заново на каждом снимке, и
 // CSS-анимация начиналась бы сначала. Каталог (catalog.json) собирает tools/petdex_catalog.py этого репо; выбор — в этом браузере
 // (localStorage). Выбран маскот — облачко плагина mascot в шапке прячется (body.has-pet), чтобы не было двух.
+// The cloud is the kalimullin:mascot plugin. We do not copy its code: it draws the cloud in the header itself, and our
+// choice decides which of the two is visible. "Cloud" in the gallery = no mascot picked (the cloud shows in the header);
+// if that plugin is switched off, the card turns it on via /api/plugins/toggle (on the owner's click).
 const CDN = "https://assets.petdex.dev/pets";
+const CLOUD = "kalimullin:mascot";
 const KEY = "hub.mascots.pet";
 const AVATAR = "hub.mascots.avatar";   // "1" — маскот вместо значка аккаунта в шапке (владелец 07.10)
 // кнопка «Настройки» (#conn) стояла в шапке; в хабе с меню ☰ (v1.1) она — пункт меню (#nav-extra), аватару там не место
@@ -12,9 +16,15 @@ const accountInHeader = () => { const c = document.getElementById("conn"); retur
 const asAvatar = () => { try { return localStorage.getItem(AVATAR) === "1" && accountInHeader(); } catch { return false; } };
 const FRAMES = 6, STEP_MS = 180, PAGE = 60;
 const calm = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+// the cloud plugin in this hub: null = not installed, {on} = enabled (a disabled plugin is not loaded and serves no files)
+const cloud = () => {
+  const p = (hub?.snapshot()?.plugins || []).find((x) => x.name === CLOUD);
+  return p && !p.missing ? { on: !p.disabled } : null;
+};
 const preview = (id) => `${CDN}/${encodeURIComponent(id)}/preview.webp`;
 
 let hub = null, catalog = null, loadError = "", head = null;
+let cloudCard = null, cloudSig = "", cloudNote = "";   // the cloud card, what we last showed (on/off), error message
 let query = "", shown = PAGE, grid = null, more = null, count = null, now = null, filtersBox = null;
 const filter = { kind: null, color: null };   // выбранное по строкам: И между строками, одно в строке
 const expanded = new Set();   // строки, развёрнутые по «+N ещё»
@@ -43,6 +53,17 @@ function chosen() {
 function mark() {
   const id = chosen()?.id;
   for (const [cid, b] of cards) b.setAttribute("aria-pressed", String(cid === id));
+  cloudCard?.setAttribute("aria-pressed", String(!id && !!cloud()?.on));
+}
+
+// "Cloud": no mascot picked, so the kalimullin:mascot plugin shows in the header; if it is off, turn it on first
+async function chooseCloud() {
+  cloudNote = "";
+  choose(null);
+  if (cloud()?.on === false) {
+    const r = await hub.post("/api/plugins/toggle", { name: CLOUD, enabled: true });
+    if (r.error) { cloudNote = `Не удалось включить облачко: ${r.error}`; paintNow(); }
+  }
 }
 
 function choose(pet) {
@@ -93,16 +114,20 @@ function paintNow() {
   if (!now) return;
   const pet = chosen();
   if (!pet) {
-    now.replaceChildren(hub.el("p", "pets-note", "Маскот не выбран: в шапке — облачко, которое показывает состояние флота. Выберите маскота ниже."));
+    const c = cloud();
+    now.replaceChildren(hub.el("p", "pets-note", cloudNote || (c?.on
+      ? "Сейчас в шапке — облачко (плагин mascot): показывает состояние флота. Выберите маскота ниже — облачко уступит ему место."
+      : c ? "Маскот не выбран. Облачко (плагин mascot) выключено: карточка «Облачко» ниже включит его, или выберите маскота."
+        : "Маскот не выбран. Выберите маскота ниже.")));
     return;
   }
   const s = sprite(pet.id, "");
   s.play();
   const text = hub.el("div");
   text.append(hub.el("b", null, pet.name || pet.id), hub.el("span", null, asAvatar() ? "сейчас вместо аватара в шапке" : "сейчас в шапке боковой панели"));
-  const off = hub.el("button", "btn", "Вернуть облачко");
+  const off = hub.el("button", "btn", cloud() ? "Вернуть облачко" : "Убрать маскота");
   off.type = "button";
-  off.addEventListener("click", () => choose(null));
+  off.addEventListener("click", () => (cloud() ? chooseCloud() : choose(null)));
   const box = hub.el("div", "pets-now");
   const opt = hub.el("label", "pets-opt");
   const cb = document.createElement("input");
@@ -179,10 +204,36 @@ function card([id, name]) {
   return b;
 }
 
+// the cloud card goes first in the grid while kalimullin:mascot is installed; search and filters hide it when it does not match
+function paintCloud() {
+  const c = cloud();
+  cloudSig = String(c?.on ?? "");
+  cloudCard?.remove();
+  cloudCard = null;
+  const q = query.trim().toLowerCase();
+  if (!c || !grid || ROWS.some((r) => filter[r.key] != null) || (q && !"облачко cloud mascot".includes(q))) return;
+  const b = hub.el("button", "pets-card pets-cloud-card");
+  b.type = "button";
+  b.title = c.on ? "Облачко (плагин mascot) — выбрать" : "Облачко (плагин mascot) выключено — включить и выбрать";
+  const pic = hub.el("div", "pets-cloud");
+  if (c.on) {   // icon is the plugin's own file while it is enabled and served
+    const img = document.createElement("img");
+    img.src = `/ext/${CLOUD}/icon.svg`; img.alt = ""; img.draggable = false;
+    img.addEventListener("error", () => img.replaceWith("☁"), { once: true });
+    pic.append(img);
+  } else pic.textContent = "☁";
+  b.append(pic, hub.el("span", "pets-name", c.on ? "Облачко" : "Облачко · выкл."));
+  b.addEventListener("click", chooseCloud);
+  cloudCard = b;
+  grid.prepend(b);
+  mark();
+}
+
 function paintGrid(reset) {
   const list = matches();
-  if (reset) { shown = PAGE; cards.clear(); grid.replaceChildren(); }
-  grid.append(...list.slice(grid.children.length, shown).map(card));
+  if (reset) { shown = PAGE; cards.clear(); grid.replaceChildren(); cloudCard = null; }
+  grid.append(...list.slice(cards.size, shown).map(card));
+  if (reset) paintCloud();
   count.textContent = list.length ? `${Math.min(shown, list.length)} из ${list.length}` : "Ничего не нашлось";
   more.hidden = shown >= list.length;
 }
@@ -241,6 +292,7 @@ export default function register(h) {
     id: "mascots", title: "Маскоты", hint: "Галерея маскотов petdex.dev для шапки",
     render(root) {
       if (!root.querySelector(".pets")) build(root);
+      else if (grid && String(cloud()?.on ?? "") !== cloudSig) { paintCloud(); paintNow(); }   // cloud plugin installed, enabled or removed
     },
   });
   addEventListener("storage", (e) => { if (e.key === KEY || e.key === AVATAR) { paintHead(); paintNow(); mark(); } });
