@@ -49,3 +49,7 @@ body.has-pet .mascot.in-header { display: none; }
 .pets-chip.more { border-color: transparent; background: transparent; color: var(--muted-foreground); }
 .pets-dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
 .pets-reset { justify-self: start; }
+
+/* Clean (html.th-clean): the chosen pet and the chosen chip are marked by a neutral line and fill of the theme, not the blue accent */
+html.th-clean .pets-card[aria-pressed="true"] { border-color: var(--c-line-strong); box-shadow: 0 0 0 1px var(--c-line-strong) inset; }
+html.th-clean .pets-chip[aria-pressed="true"] { border-color: var(--c-line-strong); background: var(--c-fill); }
