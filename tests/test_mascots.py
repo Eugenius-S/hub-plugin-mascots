@@ -99,6 +99,19 @@ class Manifest(unittest.TestCase):
         js = read("main.js")
         self.assertIn('"hub.settingsTab", "x:mascots"', js)   # a plugin tab in Settings: x:<id>
 
+    def test_header_mascot_is_a_keyboard_button_and_sits_in_the_clean_corner(self):
+        js = read("main.js")
+        css = read("mascots.css")
+        self.assertIn('setAttribute("role", "button"); head.root.tabIndex = 0', js)   # the slot is the button
+        self.assertIn('removeAttribute("tabindex")', js)   # an empty slot (no pet, or the pet is the avatar) is not focusable
+        self.assertRegex(js, r'e\.key !== "Enter" && e\.key !== " "')   # Enter and Space open the gallery like a click
+        # the corner, the 36 px box, hover and focus ring exist only under Clean: the default theme does not change
+        self.assertIn('html.th-clean .search-row #slot-sidebar-header { order: -1; gap: 0; }', css)
+        for line in css.splitlines():
+            if "#slot-sidebar-header" in line:
+                self.assertTrue(line.startswith("html.th-clean "), line)
+        self.assertIn("outline: 2px solid var(--c-ring); outline-offset: 2px;", css)
+
     def test_cloud_plugin_is_one_choice_and_never_drawn_with_a_pet(self):
         # the kalimullin:mascot cloud is a gallery card; we never copy its code, our choice hides it and turns it on
         js = read("main.js")

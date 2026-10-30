@@ -178,6 +178,7 @@ function paintHead() {
   head.sprite?.stop();
   head.sprite = null;
   head.root.replaceChildren();
+  head.root.removeAttribute("role"); head.root.removeAttribute("tabindex"); head.root.removeAttribute("title");   // an empty slot is not a button
   conn?.querySelector(".pet-avatar")?.remove();
   document.body.classList.toggle("has-pet", !!pet);
   document.body.classList.toggle("pet-as-avatar", avatar && !!conn);
@@ -186,6 +187,7 @@ function paintHead() {
   if (avatar && conn) conn.prepend(head.sprite.node);
   else {
     head.root.title = t("head_title", { name: pet.name || pet.id });
+    head.root.setAttribute("role", "button"); head.root.tabIndex = 0;   // the slot is the button: reachable from the keyboard (Clean draws its focus ring)
     head.root.append(head.sprite.node);
   }
   head.sprite.play();
@@ -357,10 +359,16 @@ export default function register(h) {
     render(root) {
       if (head?.root === root) return;   // root lives across snapshots: the mascot is drawn once
       head = { root, sprite: null };
-      root.addEventListener("click", () => {   // a click on the mascot opens its gallery in Settings
+      const open = () => {   // a click (Enter, Space) on the mascot opens its gallery in Settings
         try { localStorage.setItem("hub.settingsTab", "x:mascots"); } catch { /* no storage */ }
         if (location.hash === "#/settings") dispatchEvent(new HashChangeEvent("hashchange"));
         else location.hash = "#/settings";
+      };
+      root.addEventListener("click", open);
+      root.addEventListener("keydown", (e) => {
+        if (e.target !== root || (e.key !== "Enter" && e.key !== " ")) return;
+        e.preventDefault();
+        open();
       });
       paintHead();
     },

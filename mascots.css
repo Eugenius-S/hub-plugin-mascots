@@ -4,6 +4,15 @@
 .pet-head { width: 37px; height: 40px; margin: -4px 0; cursor: pointer; }
 /* Clean: as tall as the neighbouring buttons of the header (the theme's --ctl-h), the sprite keeps its 37:40 shape */
 html.th-clean .pet-head { width: calc(var(--ctl-h, 40px) * 37 / 40); height: var(--ctl-h, 40px); margin: 0; }
+/* Clean: the mascot is a 36 px button in the left corner of the header row, the search moves right of it (the slot host goes first;
+   gap 0: an empty slot of another plugin would add 8 px before the mascot). The slot is the button: tabindex and role are set in main.js.
+   The cloud of the mascot plugin (shown while no pet is picked) takes the same corner and the same box; it is not a button, so no hover */
+html.th-clean .search-row #slot-sidebar-header { order: -1; gap: 0; }
+html.th-clean #slot-sidebar-header .slot[data-plugin="eugenius-s:mascots"]:not(:empty),
+html.th-clean #slot-sidebar-header .slot[data-plugin="kalimullin:mascot"] { width: 36px; height: 36px; display: grid; place-items: center; margin: 0; }
+html.th-clean #slot-sidebar-header .slot[data-plugin="eugenius-s:mascots"]:not(:empty) { border-radius: 8px; cursor: pointer; }
+html.th-clean #slot-sidebar-header .slot[data-plugin="eugenius-s:mascots"]:not(:empty):hover { background: var(--c-hover); }
+html.th-clean #slot-sidebar-header .slot[data-plugin="eugenius-s:mascots"]:focus-visible { outline: 2px solid var(--c-ring); outline-offset: 2px; }
 /* instead of the avatar: on the Settings button only the mascot, the same size as right of the title;
    no backing circle, no account icon, no connection light */
 .pet-avatar { width: 37px; height: 40px; margin: -2px 0; pointer-events: none; }
